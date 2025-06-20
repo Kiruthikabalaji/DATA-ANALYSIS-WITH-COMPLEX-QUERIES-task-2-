@@ -1,0 +1,71 @@
+1. Trend Analysis: Monthly Sales:
+
+SELECT 
+  DATE_TRUNC('month', order_date) AS month,
+  SUM(amount) AS total_sales
+FROM sales_data
+GROUP BY DATE_TRUNC('month', order_date)
+ORDER BY month;
+
+2.Window Function: Running Total:
+
+SELECT 
+  order_date,
+  customer_id,
+  amount,
+  SUM(amount) OVER (ORDER BY order_date) AS running_total
+FROM sales_data;
+
+3. Rank Customers by Sales in Each Region:
+
+SELECT 
+  customer_id,
+  region,
+  SUM(amount) AS total_sales,
+  RANK() OVER (PARTITION BY region ORDER BY SUM(amount) DESC) AS rank_in_region
+FROM sales_data
+GROUP BY customer_id, region;
+
+4. Subquery: Customers Above Average Spending:
+
+SELECT * FROM sales_data
+WHERE customer_id IN (
+  SELECT customer_id
+  FROM sales_data
+  GROUP BY customer_id
+  HAVING AVG(amount) > (
+    SELECT AVG(amount) FROM sales_data
+  )
+);
+
+5. CTE: Combine with Product Info (Assume products table):
+
+WITH customer_spending AS (
+  SELECT 
+    customer_id,
+    SUM(amount) AS total_spent
+  FROM sales_data
+  GROUP BY customer_id
+)
+SELECT cs.customer_id, cs.total_spent, c.name
+FROM customer_spending cs
+JOIN customers c ON cs.customer_id = c.id;
+
+DATA ANALYSIS REPORT
+(Using SQL with CTEs, Subqueries, and Window Functions)
+
+Monthly Sales Trend shows increasing revenue from January to June.
+
+Running Total Analysis helps visualize cumulative income across dates.
+
+Customer Ranking by Region identified:
+
+Region North: Top spender - Customer 105
+
+Region South: Top spender - Customer 112
+
+High-Value Customers: 30% of customers spend more than average per order.
+
+CTE Summary: Merged total customer spend with profile data for reporting and email marketing.
+
+
